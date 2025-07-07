@@ -3,196 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Downloader de Vídeo do Instagram</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Painel SMM</title>
+    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <style>
-        /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .gradient-bg {
-            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .animate-fade-in {
-            opacity: 0;
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
-</head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
-
-    <main class="w-full max-w-2xl mx-auto">
-        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-10 text-white">
-            
-            <!-- Header -->
-            <div class="text-center mb-8">
-                <i class="fab fa-instagram text-5xl mb-3"></i>
-                <h1 class="text-3xl md:text-4xl font-bold">Downloader de Vídeo do Instagram</h1>
-                <p class="text-gray-200 mt-2">Cole o link do vídeo, Reels ou IGTV para baixar sem marca d'água.</p>
-            </div>
-
-            <!-- Input Form -->
-            <form id="downloadForm" class="flex flex-col sm:flex-row items-center gap-3">
-                <div class="relative w-full">
-                    <i class="fa fa-link absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                    <input 
-                        type="url" 
-                        id="instagramUrl"
-                        placeholder="https://www.instagram.com/p/..." 
-                        class="w-full bg-white/20 border border-transparent focus:border-white/50 focus:ring-2 focus:ring-white/50 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-300 transition duration-300 ease-in-out"
-                        required
-                    >
-                </div>
-                <button 
-                    type="submit"
-                    id="downloadBtn"
-                    class="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#fd1d1d] font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-gray-200 transform hover:scale-105 transition duration-300 ease-in-out"
-                >
-                    <i class="fa fa-download"></i>
-                    <span>Baixar</span>
-                </button>
-            </form>
-
-            <!-- Loading Spinner -->
-            <div id="loader" class="hidden text-center mt-8">
-                <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p class="mt-2">A processar o seu link...</p>
-            </div>
-            
-            <!-- Result/Error Display -->
-            <div id="result" class="mt-8"></div>
-
-        </div>
-
-        <!-- Footer -->
-        <footer class="text-center mt-6 text-white/70 text-sm">
-            <p>&copy; 2025 nolido todos os direitos reservados.</p>
-        </footer>
-    </main>
-
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js Component Definition -->
     <script>
-        const downloadForm = document.getElementById('downloadForm');
-        const instagramUrlInput = document.getElementById('instagramUrl');
-        const downloadBtn = document.getElementById('downloadBtn');
-        const loader = document.getElementById('loader');
-        const resultDiv = document.getElementById('result');
-
-        downloadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const url = instagramUrlInput.value.trim();
-
-            const instagramRegex = /^https:\/\/www\.instagram\.com\/(p|reel|tv)\//;
-            if (!instagramRegex.test(url)) {
-                displayMessage('Por favor, insira um link válido de uma publicação do Instagram (Vídeo, Reel, ou IGTV).', 'error');
-                return;
-            }
-
-            resultDiv.innerHTML = '';
-            loader.classList.remove('hidden');
-            downloadBtn.disabled = true;
-            downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            
-            // --- CORREÇÃO: Usando um proxy CORS com tratamento de erros melhorado ---
-            const targetUrl = `https://instander.app/api/downloader?url=${encodeURIComponent(url)}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) {
-                    throw new Error(`O servidor proxy retornou um erro: ${response.status}`);
-                }
-
-                const proxyData = await response.json();
-
-                if (proxyData.contents === null) {
-                    throw new Error("O proxy não conseguiu aceder ao conteúdo. O serviço de download pode estar offline ou a bloquear o proxy.");
-                }
+        function smmPanel() {
+            return {
+                // --- CONFIGURAÇÃO DA API ---
+                apiKey: '9723df94af63fa1b05cd4ebf31782ea0',
+                apiUrl: 'https://corsproxy.io/?https://uptubegm.com/api/v2',
                 
-                let data;
-                try {
-                    data = JSON.parse(proxyData.contents);
-                } catch (e) {
-                    console.error("Conteúdo inválido retornado pela API de destino:", proxyData.contents);
-                    throw new Error("O serviço de download retornou uma resposta inesperada (não-JSON).");
-                }
+                // --- ESTADO DO PAINEL ---
+                balance: 0.00, // Saldo do cliente
+                isLoading: false,
 
-                console.log('Resposta da API (via proxy):', data);
+                // --- ESTADO DO FORMULÁRIO DE PEDIDO ---
+                selectedCategory: '',
+                selectedServiceId: '',
+                link: '',
+                quantity: 10,
 
-                if (data.status === 'ok' && data.data && data.data.length > 0) {
-                    const video = data.data.find(media => media.type === 'video');
-                    if (video) {
-                        displayVideoResult(video.url, video.thumbnail);
-                    } else {
-                        displayMessage('Esta publicação não contém um vídeo para baixar.', 'info');
+                // --- ESTADO DO MODAL DE PAGAMENTO ---
+                showPixModal: false,
+                pixAmount: 10.00,
+                pixQRCode: '',
+                pixCopyPaste: '',
+                isGeneratingPix: false,
+
+                // --- ESTADO DAS NOTIFICAÇÕES ---
+                notification: { show: false, message: '', type: 'success' },
+
+                // --- DADOS DOS SERVIÇOS (CARREGADOS DA API) ---
+                servicesData: {},
+
+                // --- PROPRIEDADES CALCULADAS ---
+                get charge() {
+                    if (!this.selectedServiceId || !this.quantity || !this.selectedCategory) return 0;
+                    const service = this.servicesData[this.selectedCategory]?.find(s => s.service == this.selectedServiceId);
+                    if (!service) return 0;
+                    const rate = service.rate || 0;
+                    return (this.quantity / 1000) * parseFloat(rate);
+                },
+                get isFormValid() {
+                    try {
+                        new URL(this.link);
+                        // Validação agora checa se o saldo é suficiente
+                        return this.selectedCategory && this.selectedServiceId && this.link && this.quantity >= 10 && this.charge <= this.balance;
+                    } catch (_) {
+                        return false;
                     }
-                } else {
-                    throw new Error(data.message || 'Não foi possível obter o vídeo. Verifique se o link está correto e se a publicação é pública.');
-                }
+                },
+                
+                // --- INICIALIZAÇÃO ---
+                init() {
+                    this.fetchServices();
+                    this.fetchBalance(); // Busca o saldo inicial
+                },
 
-            } catch (error) {
-                console.error('Erro na API:', error);
-                displayMessage(error.message || 'Ocorreu um erro ao processar o seu pedido. Por favor, tente novamente.', 'error');
-            } finally {
-                loader.classList.add('hidden');
-                downloadBtn.disabled = false;
-                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-            }
-        });
+                // --- SEÇÃO DE SALDO E PAGAMENTOS ---
+                fetchBalance() {
+                    // **LÓGICA DE EXEMPLO:** Em um sistema real, você buscaria o saldo do usuário no seu banco de dados.
+                    // Por enquanto, vamos começar com um saldo de R$ 5,00 para demonstração.
+                    this.balance = 5.00;
+                    console.log("Saldo inicial carregado.");
+                },
 
-        function displayVideoResult(videoUrl, thumbnailUrl) {
-            resultDiv.innerHTML = `
-                <div class="glass-card rounded-xl p-4 animate-fade-in">
-                    <img 
-                        src="${thumbnailUrl}" 
-                        alt="Pré-visualização do vídeo" 
-                        class="rounded-lg w-full h-auto object-cover mb-4 border border-white/20"
-                        onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/FFFFFF?text=Preview+Indispon%C3%ADvel';"
-                    >
-                    <a 
-                        href="${videoUrl}" 
-                        download="instagram_video.mp4"
-                        target="_blank"
-                        class="w-full flex items-center justify-center gap-3 bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-600 transform hover:scale-105 transition duration-300 ease-in-out"
-                    >
-                        <i class="fa fa-check-circle"></i>
-                        <span>BAIXAR VÍDEO (HD)</span>
-                    </a>
-                </div>
-            `;
-        }
+                async generatePix() {
+                    if (this.pixAmount < 1) {
+                        this.showNotification('O valor mínimo para recarga é R$ 1,00.', 'error');
+                        return;
+                    }
+                    this.isGeneratingPix = true;
+                    this.pixQRCode = '';
+                    this.pixCopyPaste = '';
+                    
+                    // **CHAMADA AO SEU BACK-END PARA GERAR O PIX**
+                    // Esta função deve chamar o seu servidor, que por sua vez chama a API do Mercado Pago.
+                    // O front-end NUNCA deve chamar a API do Mercado Pago diretamente por segurança.
+                    console.log(`Solicitando PIX de R$ ${this.pixAmount} ao back-end...`);
 
-        function displayMessage(message, type = 'error') {
-            let colorClass = 'bg-red-500/80';
-            if (type === 'info') {
-                colorClass = 'bg-blue-500/80';
-            }
-            
-            resultDiv.innerHTML = `
-                <div class="${colorClass} text-white text-center p-3 rounded-xl animate-fade-in">
-                    ${message}
-                </div>
-            `;
+                    // **SIMULAÇÃO DE CHAMADA AO BACK-END**
+                    // Em um cenário real, você faria:
+                    // const response = await fetch('URL_DO_SEU_BACKEND/criar-pix', { method: 'POST', ... });
+                    // const data = await response.json();
+                    // this.pixQRCode = data.qrCodeBase64;
+                    // this.pixCopyPaste = data.pixCopyPaste;
+                    setTimeout(() => {
+                        // O seu back-end retornaria algo assim:
+                        const backendResponse = {
+                            qrCodeBase64: "iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABlBMVEX///8AAABVwtN+AAACFUlEQVR42u3WMQ0AIAwEwPz/p9sZVAXbAkl2J2cAEJ8dhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmey3i/m/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL",
+                            pixCopyPaste: "00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-4266141740005204000053039865802BR5913NOME DO VENDEDOR6008BRASILIA62070503***6304E2A4"
+                        };
+                        this.pixQRCode = `data:image/png;base64,${backendResponse.qrCodeBase64}`;
+                        this.pixCopyPaste = backendResponse.pixCopyPaste;
+                        this.isGeneratingPix = false;
+                    }, 2000);
+                },
+
+                copyToClipboard(text) {
+                    const el = document.createElement('textarea');
+                    el.value = text;
+                    document.body.appendChild(el);
+                    el.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(el);
+                    this.showNotification('Código PIX copiado!', 'success');
+                },
+
+                // --- SEÇÃO DE PEDIDOS ---
+                async fetchServices() {
+                    this.isLoading = true;
+                    console.log("Buscando serviços da API...");
+                    try {
+                        const response = await fetch(`${this.apiUrl}?key=${this.apiKey}&action=services`);
+                        if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
+                        const services = await response.json();
+                        this.servicesData = this.groupServicesByCategory(services);
+                        console.log("Serviços carregados com sucesso!");
+                    } catch (error) {
+                        console.error("Falha ao buscar serviços:", error);
+                        this.showNotification(`Não foi possível carregar os serviços.`, 'error');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                async submitOrder() {
+                    if (!this.isFormValid) {
+                        this.showNotification('Formulário inválido ou saldo insuficiente.', 'error');
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    // **LÓGICA DE EXEMPLO:** Deduz o valor do saldo localmente
+                    this.balance -= this.charge;
+
+                    console.log("Enviando pedido para a API...");
+                    try {
+                        const formData = new FormData();
+                        formData.append('key', this.apiKey);
+                        formData.append('action', 'add');
+                        formData.append('service', this.selectedServiceId);
+                        formData.append('link', this.link);
+                        formData.append('quantity', this.quantity);
+
+                        const response = await fetch(this.apiUrl, { method: 'POST', body: formData });
+                        const result = await response.json();
+
+                        if (result.order) {
+                            this.showNotification(`Pedido #${result.order} criado com sucesso!`, 'success');
+                            this.resetForm();
+                        } else {
+                            // Se o pedido falhar na API, estorna o saldo
+                            this.balance += this.charge;
+                            throw new Error(result.error || 'Erro desconhecido na API.');
+                        }
+                    } catch (error) {
+                        this.showNotification(`Erro ao criar pedido: ${error.message}`, 'error');
+                        // Garante o estorno em caso de falha na comunicação
+                        this.balance += this.charge;
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
+                // --- FUNÇÕES AUXILIARES ---
+                groupServicesByCategory(services) {
+                    if (!Array.isArray(services)) {
+                        console.error("A resposta da API de serviços não foi um array.");
+                        return {};
+                    }
+                    return services.reduce((acc, service) => {
+                        const category = service.category || 'Outros';
+                        if (!acc[category]) acc[category] = [];
+                        acc[category].push(service);
+                        return acc;
+                    }, {});
+                },
+                
+                updateServices() { this.selectedServiceId = ''; },
+                
+                resetForm() {
+                    this.selectedCategory = '';
+                    this.selectedServiceId = '';
+                    this.link = '';
+                    this.quantity = 10;
+                },
+
+                showNotification(message, type = 'success') {
+                    this.notification.message = message;
+                    this.notification.type = type;
+                    this.notification.show = true;
+                    setTimeout(() => { this.notification.show = false; }, 5000);
+                },
+            };
         }
     </script>
+    
+    <!-- Alpine.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        .glassmorphism { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .form-select, .form-input { background-color: rgba(0, 0, 0, 0.2); border-color: rgba(255, 255, 255, 0.3); }
+        .form-select:focus, .form-input:focus { --tw-ring-color: #4f46e5; border-color: #4f46e5; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+
+    <div x-data="smmPanel()" x-init="init()" class="min-h-screen w-full p-4 sm:p-6 lg:p-8 flex flex-col items-center">
+        
+        <!-- Header -->
+        <header class="w-full max-w-4xl mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-4xl font-bold text-white">Painel SMM</h1>
+                <div class="text-right">
+                    <span class="text-gray-400 text-sm">Seu Saldo</span>
+                    <p class="text-2xl font-bold text-green-400" x-text="`R$ ${balance.toFixed(2)}`"></p>
+                </div>
+            </div>
+            <p class="text-gray-400 mt-2 text-center">Selecione um serviço e faça seu pedido.</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="w-full max-w-2xl">
+            <div class="glassmorphism rounded-2xl shadow-2xl p-6 sm:p-8">
+                
+                <!-- Botão para Adicionar Saldo -->
+                <div class="mb-8">
+                    <button @click="showPixModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                        Adicionar Saldo via PIX
+                    </button>
+                </div>
+
+                <h2 class="text-2xl font-semibold mb-6 text-center border-t border-gray-700 pt-6">🚀 Novo Pedido</h2>
+
+                <!-- Order Form -->
+                <form @submit.prevent="submitOrder">
+                    <div class="space-y-6">
+                        <!-- Category -->
+                        <div>
+                            <label for="category" class="block text-sm font-medium text-gray-300 mb-2">Categoria</label>
+                            <select id="category" name="category" x-model="selectedCategory" @change="updateServices()" class="form-select w-full rounded-lg py-3 px-4 text-white transition duration-300">
+                                <option value="">-- Carregando categorias... --</option>
+                                <template x-for="category in Object.keys(servicesData)" :key="category">
+                                    <option :value="category" x-text="category"></option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Service -->
+                        <div>
+                            <label for="service" class="block text-sm font-medium text-gray-300 mb-2">Serviço</label>
+                            <select id="service" name="service" x-model="selectedServiceId" class="form-select w-full rounded-lg py-3 px-4 text-white transition duration-300" :disabled="!selectedCategory">
+                                <option value="">-- Selecione um Serviço --</option>
+                                <template x-if="selectedCategory">
+                                    <template x-for="service in servicesData[selectedCategory]" :key="service.service">
+                                        <option :value="service.service" x-text="`${service.name} - R$ ${Number(service.rate).toFixed(2)} / 1k`"></option>
+                                    </template>
+                                </template>
+                            </select>
+                        </div>
+
+                        <!-- Link -->
+                        <div>
+                            <label for="link" class="block text-sm font-medium text-gray-300 mb-2">Link</label>
+                            <input type="url" id="link" name="link" x-model="link" placeholder="https://www.instagram.com/seu_perfil" class="form-input w-full rounded-lg py-3 px-4 text-white transition duration-300">
+                        </div>
+
+                        <!-- Quantity -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-300 mb-2">Quantidade</label>
+                            <input type="number" id="quantity" name="quantity" x-model.number="quantity" placeholder="Mín: 10" min="10" class="form-input w-full rounded-lg py-3 px-4 text-white transition duration-300">
+                        </div>
+                    </div>
+
+                    <!-- Charge -->
+                    <div class="mt-8 p-4 rounded-lg bg-gray-800 text-center">
+                        <p class="text-sm text-gray-400">Custo Total do Pedido</p>
+                        <p class="text-2xl font-bold" :class="charge > balance ? 'text-red-400' : 'text-green-400'" x-text="`R$ ${charge.toFixed(2)}`"></p>
+                        <p x-show="charge > balance" class="text-red-400 text-sm mt-1">Saldo insuficiente.</p>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-8">
+                        <button type="submit" :disabled="!isFormValid || isLoading" class="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-900 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                            <span x-show="!isLoading">Fazer Pedido</span>
+                            <span x-show="isLoading">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Processando...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+        
+        <!-- PIX Payment Modal -->
+        <div x-show="showPixModal" @keydown.escape.window="showPixModal = false" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50" x-cloak>
+            <div @click.away="showPixModal = false" class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 text-white">
+                <h3 class="text-2xl font-bold text-center mb-6">Adicionar Saldo via PIX</h3>
+                
+                <div x-show="!pixQRCode && !isGeneratingPix">
+                    <label for="pix-amount" class="block text-sm font-medium text-gray-300 mb-2">Valor da Recarga (R$)</label>
+                    <input type="number" id="pix-amount" x-model.number="pixAmount" min="1" class="form-input w-full rounded-lg py-3 px-4 text-white mb-4">
+                    <button @click="generatePix()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300">
+                        Gerar PIX
+                    </button>
+                </div>
+
+                <div x-show="isGeneratingPix" class="text-center py-8">
+                    <svg class="animate-spin mx-auto h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="mt-4">Gerando seu PIX, aguarde...</p>
+                </div>
+
+                <div x-show="pixQRCode" class="text-center" x-cloak>
+                    <p class="mb-4">Escaneie o QR Code ou use o Copia e Cola.</p>
+                    <img :src="pixQRCode" alt="PIX QR Code" class="mx-auto rounded-lg border-4 border-white">
+                    <div class="mt-4 p-3 bg-gray-900 rounded-lg break-all text-sm">
+                        <code x-text="pixCopyPaste"></code>
+                    </div>
+                    <button @click="copyToClipboard(pixCopyPaste)" class="mt-4 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        Copiar Código
+                    </button>
+                    <p class="text-xs text-gray-400 mt-4">Após o pagamento, seu saldo será atualizado automaticamente em alguns instantes.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div x-show="notification.show" x-transition class="fixed bottom-5 right-5 p-4 rounded-lg shadow-lg text-white max-w-sm z-50" :class="{ 'bg-green-600': notification.type === 'success', 'bg-red-600': notification.type === 'error' }" x-cloak>
+            <p x-text="notification.message"></p>
+        </div>
+
+    </div>
+
 </body>
 </html>
