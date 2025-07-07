@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloader de Vídeo do Instagram</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .animate-fade-in {
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+
+    <main class="w-full max-w-2xl mx-auto">
+        <div class="glass-card rounded-2xl shadow-2xl p-6 md:p-10 text-white">
+            
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <i class="fab fa-instagram text-5xl mb-3"></i>
+                <h1 class="text-3xl md:text-4xl font-bold">Downloader de Vídeo do Instagram</h1>
+                <p class="text-gray-200 mt-2">Cole o link do vídeo, Reels ou IGTV para baixar sem marca d'água.</p>
+            </div>
+
+            <!-- Input Form -->
+            <form id="downloadForm" class="flex flex-col sm:flex-row items-center gap-3">
+                <div class="relative w-full">
+                    <i class="fa fa-link absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    <input 
+                        type="url" 
+                        id="instagramUrl"
+                        placeholder="https://www.instagram.com/p/..." 
+                        class="w-full bg-white/20 border border-transparent focus:border-white/50 focus:ring-2 focus:ring-white/50 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-300 transition duration-300 ease-in-out"
+                        required
+                    >
+                </div>
+                <button 
+                    type="submit"
+                    id="downloadBtn"
+                    class="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-[#fd1d1d] font-bold py-3 px-8 rounded-xl shadow-lg hover:bg-gray-200 transform hover:scale-105 transition duration-300 ease-in-out"
+                >
+                    <i class="fa fa-download"></i>
+                    <span>Baixar</span>
+                </button>
+            </form>
+
+            <!-- Loading Spinner -->
+            <div id="loader" class="hidden text-center mt-8">
+                <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p class="mt-2">Processando seu link...</p>
+            </div>
+            
+            <!-- Result/Error Display -->
+            <div id="result" class="mt-8"></div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-6 text-white/70 text-sm">
+            <p>&copy; 2025 nolido todos os direitos reservados.</p>
+        </footer>
+    </main>
+
+    <script>
+        const downloadForm = document.getElementById('downloadForm');
+        const instagramUrlInput = document.getElementById('instagramUrl');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loader = document.getElementById('loader');
+        const resultDiv = document.getElementById('result');
+
+        downloadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const url = instagramUrlInput.value.trim();
+
+            if (!url) {
+                displayMessage('Por favor, insira uma URL válida.', 'error');
+                return;
+            }
+
+            // Reset UI and show loader
+            resultDiv.innerHTML = '';
+            loader.classList.remove('hidden');
+            downloadBtn.disabled = true;
+            downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // --- REAL API CALL ---
+            const apiKey = 'd7799952d6msh87a933663bf94aap18f5dcjsn0de1f869755a';
+            const apiUrl = `https://instagram-downloader-2023.p.rapidapi.com/api/post?url=${encodeURIComponent(url)}`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    'x-rapidapi-key': apiKey,
+                    'x-rapidapi-host': 'instagram-downloader-2023.p.rapidapi.com'
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, options);
+                const data = await response.json();
+
+                if (data.status === 'success' && data.data && data.data.medias && data.data.medias.length > 0) {
+                    // Find the first video in the response
+                    const video = data.data.medias.find(media => media.type === 'video');
+                    if (video) {
+                        displayVideoResult(video.url, video.thumbnail, data.data.author || 'Desconhecido');
+                    } else {
+                        displayMessage('Nenhum vídeo encontrado neste link.', 'error');
+                    }
+                } else {
+                    displayMessage(data.message || 'Não foi possível obter o vídeo. Verifique o link ou tente novamente.', 'error');
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                displayMessage('Ocorreu um erro de rede. Por favor, tente novamente mais tarde.', 'error');
+            } finally {
+                // Hide loader and re-enable button
+                loader.classList.add('hidden');
+                downloadBtn.disabled = false;
+                downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+
+        function displayVideoResult(videoUrl, thumbnailUrl, author) {
+            resultDiv.innerHTML = `
+                <div class="glass-card rounded-xl p-4 animate-fade-in">
+                    <p class="text-sm mb-2">Vídeo de: <span class="font-bold">${author}</span></p>
+                    <img 
+                        src="${thumbnailUrl}" 
+                        alt="Pré-visualização do vídeo" 
+                        class="rounded-lg w-full h-auto object-cover mb-4 border border-white/20"
+                        onerror="this.onerror=null;this.src='https://placehold.co/600x400/000000/FFFFFF?text=Preview+Indispon%C3%ADvel';"
+                    >
+                    <a 
+                        href="${videoUrl}" 
+                        download="instagram_video.mp4"
+                        target="_blank"
+                        class="w-full flex items-center justify-center gap-3 bg-green-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:bg-green-600 transform hover:scale-105 transition duration-300 ease-in-out"
+                    >
+                        <i class="fa fa-check-circle"></i>
+                        <span>BAIXAR VÍDEO (HD)</span>
+                    </a>
+                </div>
+            `;
+        }
+
+        function displayMessage(message, type = 'error') {
+            const colorClass = type === 'error' ? 'bg-red-500/80' : 'bg-blue-500/80';
+            resultDiv.innerHTML = `
+                <div class="${colorClass} text-white text-center p-3 rounded-xl animate-fade-in">
+                    ${message}
+                </div>
+            `;
+        }
+
+    </script>
+</body>
+</html>
