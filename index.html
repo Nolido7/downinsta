@@ -76,7 +76,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <p class="mt-2">Processando seu link...</p>
+                <p class="mt-2">A processar o seu link...</p>
             </div>
             
             <!-- Result/Error Display -->
@@ -101,61 +101,64 @@
             e.preventDefault();
             const url = instagramUrlInput.value.trim();
 
-            if (!url) {
-                displayMessage('Por favor, insira uma URL válida.', 'error');
+            const instagramRegex = /^https:\/\/www\.instagram\.com\/(p|reel|tv)\//;
+            if (!instagramRegex.test(url)) {
+                displayMessage('Por favor, insira um link válido de uma publicação do Instagram (Vídeo, Reel, ou IGTV).', 'error');
                 return;
             }
 
-            // Reset UI and show loader
             resultDiv.innerHTML = '';
             loader.classList.remove('hidden');
             downloadBtn.disabled = true;
             downloadBtn.classList.add('opacity-50', 'cursor-not-allowed');
-
-            // --- REAL API CALL (New Endpoint) ---
-            const apiKey = 'd7799952d6msh87a933663bf94aap18f5dcjsn0de1f869755a';
-            // Note the new API URL and host
-            const apiUrl = `https://instagram-downloader-download-instagram-videos-stories1.p.rapidapi.com/?url=${encodeURIComponent(url)}`;
-            const options = {
-                method: 'GET',
-                headers: {
-                    'x-rapidapi-key': apiKey,
-                    'x-rapidapi-host': 'instagram-downloader-download-instagram-videos-stories1.p.rapidapi.com'
-                }
-            };
+            
+            // --- CORREÇÃO: Usando um proxy CORS com tratamento de erros melhorado ---
+            const targetUrl = `https://instander.app/api/downloader?url=${encodeURIComponent(url)}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
             try {
-                const response = await fetch(apiUrl, options);
-                
+                const response = await fetch(proxyUrl);
                 if (!response.ok) {
-                    // Handle HTTP errors like 400, 404, 500 etc.
-                    const errorData = await response.json().catch(() => ({ message: 'Erro desconhecido.' }));
-                    throw new Error(errorData.message || `Erro: ${response.statusText}`);
+                    throw new Error(`O servidor proxy retornou um erro: ${response.status}`);
                 }
 
-                const data = await response.json();
+                const proxyData = await response.json();
 
-                // The new API returns an array of media objects.
-                if (Array.isArray(data) && data.length > 0 && data[0].url) {
-                    // We assume the first result is the one we want.
-                    const videoUrl = data[0].url;
-                    const thumbnailUrl = data[0].thumbnail;
-                    displayVideoResult(videoUrl, thumbnailUrl);
+                if (proxyData.contents === null) {
+                    throw new Error("O proxy não conseguiu aceder ao conteúdo. O serviço de download pode estar offline ou a bloquear o proxy.");
+                }
+                
+                let data;
+                try {
+                    data = JSON.parse(proxyData.contents);
+                } catch (e) {
+                    console.error("Conteúdo inválido retornado pela API de destino:", proxyData.contents);
+                    throw new Error("O serviço de download retornou uma resposta inesperada (não-JSON).");
+                }
+
+                console.log('Resposta da API (via proxy):', data);
+
+                if (data.status === 'ok' && data.data && data.data.length > 0) {
+                    const video = data.data.find(media => media.type === 'video');
+                    if (video) {
+                        displayVideoResult(video.url, video.thumbnail);
+                    } else {
+                        displayMessage('Esta publicação não contém um vídeo para baixar.', 'info');
+                    }
                 } else {
-                    displayMessage('Não foi possível obter o vídeo. Verifique o link ou tente novamente.', 'error');
+                    throw new Error(data.message || 'Não foi possível obter o vídeo. Verifique se o link está correto e se a publicação é pública.');
                 }
+
             } catch (error) {
-                console.error('API Error:', error);
-                displayMessage(error.message || 'Ocorreu um erro de rede. Por favor, tente novamente mais tarde.', 'error');
+                console.error('Erro na API:', error);
+                displayMessage(error.message || 'Ocorreu um erro ao processar o seu pedido. Por favor, tente novamente.', 'error');
             } finally {
-                // Hide loader and re-enable button
                 loader.classList.add('hidden');
                 downloadBtn.disabled = false;
                 downloadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         });
 
-        // Updated function: no longer needs the 'author' parameter.
         function displayVideoResult(videoUrl, thumbnailUrl) {
             resultDiv.innerHTML = `
                 <div class="glass-card rounded-xl p-4 animate-fade-in">
@@ -179,14 +182,17 @@
         }
 
         function displayMessage(message, type = 'error') {
-            const colorClass = type === 'error' ? 'bg-red-500/80' : 'bg-blue-500/80';
+            let colorClass = 'bg-red-500/80';
+            if (type === 'info') {
+                colorClass = 'bg-blue-500/80';
+            }
+            
             resultDiv.innerHTML = `
                 <div class="${colorClass} text-white text-center p-3 rounded-xl animate-fade-in">
                     ${message}
                 </div>
             `;
         }
-
     </script>
 </body>
 </html>
