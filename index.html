@@ -72,13 +72,13 @@
                 fetchBalance() {
                     // **LÓGICA DE EXEMPLO:** Em um sistema real, você buscaria o saldo do usuário no seu banco de dados.
                     // Por enquanto, vamos começar com um saldo de R$ 5,00 para demonstração.
-                    this.balance = 0.00;
+                    this.balance = 1.00;
                     console.log("Saldo inicial carregado.");
                 },
 
                 async generatePix() {
                     if (this.pixAmount < 1) {
-                        this.showNotification('O valor mínimo para recarga é R$ 1,00.', 'error');
+                        this.showNotification('O valor mínimo para recarga é R$ 5,00.', 'error');
                         return;
                     }
                     this.isGeneratingPix = true;
@@ -100,7 +100,7 @@
                         // O seu back-end retornaria algo assim:
                         const backendResponse = {
                             qrCodeBase64: "iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABlBMVEX///8AAABVwtN+AAACFUlEQVR42u3WMQ0AIAwEwPz/p9sZVAXbAkl2J2cAEJ8dhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmEYhmey3i/m/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL/gL",
-                            pixCopyPaste: "00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-4266141740005204000053039865802BR5913NOME DO VENDEDOR6008BRASILIA62070503***6304E2A4"
+                            pixCopyPaste: "00020126930014br.gov.bcb.pix0136ef64bf7b-c192-4a0d-9ed1-d47fc32e28170231Envie o Comprovante no suporte!52040000530398654045.005802BR5925Max Odilon Alves Pinheiro6008Brasilia62240520daqr239126807448734763045344"
                         };
                         this.pixQRCode = `data:image/png;base64,${backendResponse.qrCodeBase64}`;
                         this.pixCopyPaste = backendResponse.pixCopyPaste;
@@ -226,7 +226,7 @@
         <!-- Header -->
         <header class="w-full max-w-4xl mb-8">
             <div class="flex justify-between items-center">
-                <h1 class="text-4xl font-bold text-white">Painel SMM</h1>
+                <h1 class="text-4xl font-bold text-white">Turbo Max</h1>
                 <div class="text-right">
                     <span class="text-gray-400 text-sm">Seu Saldo</span>
                     <p class="text-2xl font-bold text-green-400" x-text="`R$ ${balance.toFixed(2)}`"></p>
